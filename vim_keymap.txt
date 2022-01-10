@@ -1,0 +1,117 @@
+:set nu
+:set hlserach
+
+■Undo/redo
+u   undo
+C-r redo
+:undol[ist]
+
+■選択
+1GvG   1Gで先頭 vでビジュアルもーど Gで最後尾
+
+■Windo切り替え
+C-w w   next
+C-w n   new buffer
+C-w [hjkl]
+C-w t  最上部
+C-W b  最下部
+C-w +  Windowを1行広げる
+
+C-w [HJKL] 今のWindowsを端に移動する Hなら←
+
+C-w _  今のWindowsを最大化
+
+■タブ
+:tabs  一覧
+:tab split  今のバッファで新規にタブ作成
+:tabe[dit] .  ファイル
+
+C-pageup    タブ移動
+C-pagedown
+
+■検索
+* カーソル下単語 forward
+# カーソル下単語 backward
+
+■マーク
+m[a-zA-Z] 記録
+`[a-zA-Z] ジャンプ
+:marks マーク一覧確認
+
+■レジスタ
+(1)コピペ
+"[a-zA-Z]<ヤンクコマンド, yy や yiw など)
+:reg で確認
+"[a-zA-Z]<ペーストコマンド, p や P, コマンドラインモードで使える)
+
+(2)操作マクロ
+q[a-zA-Z]キー入力  ←キー入力が記録される,最後にq で終了
+@[a-zA-Z] で呼び出す
+
+■ジャンプリスト
+:ju[mps] ジャンプリスト表示
+C-o 戻る
+
+■ctagsによるジャンプ
+$> ctags -R -f .tags
+:set tags=.tags      ←viを起動した場所からの相対パス
+
+■表示中画面内カーソル移動
+H
+M
+L
+50%    ファイルの50%の位置に移動
+
+■スクローr
+C-u
+C-d
+
+■ファイル
+:e
+:ls
+:b<数字>
+
+■検索
+1. カーソル下の単語をyank  yiw
+2. grep
+   :vim[grep] <ここで C-r "> ** | cw
+     ** は当該パス配下をグレップ
+     cw はQuickFix Windowsを表示する
+
+■コマンドラインモード
+: でコマンドラインモードに入る
+  C-f で過去の履歴を見れる。
+  i で編集可能
+  ! で外部コマンド実行
+
+■外部プログラムを現在バッファで実行 (つまり結果を保持したいとき)
+!!date   現在時刻出力
+!!ls -rth *.c  *.cファイル一覧を出力
+
+Visulaモードで選択後 !sort とすｒば、選択業が sort コマンドされた結果に置き換わる
+
+■外部コマンド取り込み(上と同じ)
+1. 外部コマンド出力を取り込み
+ :r !<command>
+ ※今のバッファに取り込まれるので、テンポラリなら :new で新規バッフを作ってから実施する
+ 
+2. 外部コマンド出力にわたす
+ :w !<command>
+ ※:w !wc とすると $>wc コマンド
+
+
+■QuickFixモード
+:cw でウィンドウ開く
+:cn
+:cp
+ → "@:" で直前のコマンドの繰り返しができる
+ 
+ 
+■DIFF
+:vert diffsplit XXXX.c  今のバッファに対するdiff表示
+[c
+]c
+
+■Fold展開
+zo  open
+zc  close
