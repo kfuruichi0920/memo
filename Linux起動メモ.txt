@@ -1,0 +1,77 @@
+1. barebox
+
+  /env/init   で起動
+   -> /env/boot 
+     ここで bootargs=xxxx のように、Linuxにcmdline引数を設定している。
+     最後に
+     -> bootm $bootm_opt $kdev   ★ここにcmdline追加するのが手っ取り早い
+  
+   bootmのプログラム自体は
+    arch/arm/lib32/bootm.c
+       __do_bootm_linux() -> start_linux()
+       
+    arch/arm/lib32/armlinux.c
+       start_linux() -> kernel(xxxxx)　で、このkernel は、呼び出し元の "__do_bootm_linux"の先頭で
+          kernel = data->os_res->start + data->os_entry;
+       と定義されている。
+       おそらく、linuxカーネルイメージの先頭へジャンプする。合わせてcmdline を渡す。
+
+
+2. Linux
+   
+   <<メモ>>
+   https://fowlrat.hatenablog.com/entry/2014/08/31/011056
+   
+   カーネルビルドした結果が vmlinux
+   vmlinux から .commentセクション、シンボル再配置情報を削除したものが、zImage
+   zImage から、uImage を作る。
+   
+   このuImage を、配置しておき、barebox にてアドレス指定して開始する。
+   
+   vmlinux
+   https://valinux.hatenablog.com/entry/20200910
+   によると、vmlinuz の場合は圧縮されているので、伸長プログラムも含まれ、最初に伸長プログラムがコールされる。
+   
+   
+   次に、vmLinuxは以下。
+   ARM Linuxカーネルエントリー
+   http://masahir0y.blogspot.com/2012/02/arm-linux.html
+   
+   これより、
+     arch/arm/kernel/head-common.S
+       ここから start_kernel() がコール。
+     
+     init/main.c
+     start_kernel()
+     
+     が実行される。
+   
+   
+   
+   カーネル処理が終わったら、bareboxのcmdlineで渡された  init=/etc/preinit より、rootfs の /etc/preinit が実行される。
+   
+   /etc/preinit
+     /lib/preinit/* のスクリプトが実行
+   
+   その後に
+   
+   https://openwrt.org/ja/docs/techref/process.boot
+   をみると
+   
+   /etc/inittab
+   /etc/init.d/rcS
+   
+   
+   おそらく、その後
+   
+   /etc/init.d/boot
+    start()
+    
+   がよばれる。    (起動ログから推測)
+   この中で、自作ドライバなどを定義し、ここでloadする。 ex) reg_drver qca8337 など
+   
+   
+   
+   
+   
+   
