@@ -1,0 +1,38 @@
+Option Explicit
+
+Function Sjis2Hex(Rng As Range) As String
+    
+    Dim i As Long
+    Dim s1 As String
+    Dim c1 As Integer
+    Dim outStr As String
+    
+    s1 = Rng.Text
+    outStr = ""
+    
+    For i = 1 To Len(s1)
+        
+        c1 = Asc(Mid(s1, i, 1))
+        
+        
+        Debug.Print (c1)
+        Debug.Print (Hex(c1))
+        
+        If c1 > &HFF Then
+            Debug.Print ("large1")
+            Debug.Print (Hex(c1))
+            outStr = outStr & Hex(c1)
+        ElseIf c1 < 0 Then
+            Debug.Print ("large2")
+            Debug.Print (Hex(c1))
+            outStr = outStr & Hex(c1)
+        Else
+            Debug.Print ("small")
+            Debug.Print (Format(Hex(c1), "00"))
+            outStr = outStr & Format(Hex(c1), "00")
+        End If
+        
+    Next i
+
+    Sjis2Hex = outStr
+End Function
