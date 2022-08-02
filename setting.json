@@ -1,0 +1,115 @@
+{
+    "window.zoomLevel": -1.4,
+    "files.autoGuessEncoding": true,
+
+    "workbench.colorTheme": "Visual Studio Dark",
+    "workbench.sideBar.location": "right",
+    "workbench.editor.wrapTabs": true,
+    "workbench.editor.navigationScope": "editorGroup",
+    "workbench.tree.indent": 20,
+    "workbench.list.keyboardNavigation": "filter",
+    "workbench.commandPalette.preserveInput": true,
+    "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#5100ff37",
+        "tab.activeBackground": "#ffdd0056",
+        "tab.unfocusedActiveBackground": "#ffdd001d",
+        "diffEditor.insertedTextBackground": "#00ff2672",
+        "diffEditor.insertedLineBackground": "#00ff2649",
+        "diffEditor.removedTextBackground": "#00eeff7c",
+        "diffEditor.removedLineBackground": "#00eeff45",
+        "editorRuler.foreground": "#00c3ff10"
+    },
+    "workbench.editor.autoLockGroups": {
+        "workbench.editorinputs.searchEditorInput": true,
+        "jupyter-notebook": true,
+        "mainThreadWebview-markdown.preview": true
+    },
+
+    "editor.fontFamily": "Ricty Diminished",
+    "editor.fontSize": 15,
+    "editor.mouseWheelZoom": true,
+    "editor.minimap.showSlider": "always",
+    "editor.parameterHints.cycle": true,
+    "editor.renderLineHighlight": "all",
+    "editor.rulers": [
+        0,
+        80,
+        160,
+        240,
+        320
+    ],
+    
+    "search.collapseResults": "auto",
+    "search.showLineNumbers": true,
+
+    "terminal.integrated.shellIntegration.enabled": true,
+
+    "remote.SSH.remotePlatform": {
+        "192.168.57.100": "linux"
+    },
+
+    //===== Cpp =====
+    "C_Cpp.loggingLevel": "Debug",
+    "C_Cpp.inactiveRegionForegroundColor": "#61b9ee",
+    "C_Cpp.default.cppStandard": "c++14",
+    "C_Cpp.enhancedColorization": "Enabled",
+    "clangd.detectExtensionConflicts": false,
+    //===== GitLens =====
+    "gitlens.blame.compact": true,
+    "gitlens.blame.highlight.locations": [
+        "gutter"
+    ],
+    "gitlens.currentLine.format": "${author}, ${agoOrDate} • ${message}",
+    //===== Java =====
+    "java.jdt.ls.java.home": "D:\\Program Files\\java-11-openjdk-11.0.2.7-2.windows.redhat.x86_64\\",
+    "java.dependency.packagePresentation": "hierarchical",
+    "java.completion.guessMethodArguments": true,
+    //===== PLANT UML =====
+    "plantuml.jar": "D:\\11_work\\12_PlantUML\\jar\\plantuml.1.2022.4.jar",
+    "plantuml.exportFormat": "svg",
+    //===== Bookmarks =====
+    "bookmarks.navigateThroughAllFiles": true,
+    "bookmarks.wrapNavigation": true,
+    "bookmarks.showCommandsInContextMenu": true,
+    "bookmarks.label.suggestion": "suggestWhenSelected",
+    "bookmarks.sideBar.expanded": true,
+    //===== TodoTree =====
+    "todo-tree.general.tags": [
+        "TODO",
+        "TBD",
+        "FIXME",
+        "MEMO",
+        "[ ]",
+        "[x]"
+    ],
+    "todo-tree.highlights.defaultHighlight": {
+        "icon": "alert",
+        "type": "tag",
+        "foreground":"#ffffff",
+        "background": "#ff0000",
+        "iconColour": "#ff0000",
+        "opacity": 100,
+    },
+    "todo-tree.highlights.customHighlight": {
+        "TODO": {
+            "icon": "check",
+            "type": "tag",
+        },
+        "TBD": {
+            "icon": "check",
+            "type": "tag",
+        },
+        "FIXME": {
+            "icon": "check",
+            "type": "tag",
+            "background": "#ff0000",
+        },
+        "MEMO": {
+            "icon": "check",
+            "type": "tag",
+            "background": "#ff0000",
+        },
+    },
+    "bracketPairColorizer.depreciation-notice": false,
+    "security.workspace.trust.untrustedFiles": "open",
+}
