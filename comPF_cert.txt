@@ -1,0 +1,307 @@
+# pki インストールする。opensslでもよい。
+sudo apt install strongswan-pki
+
+# 参考URL
+https://www.allied-telesis.co.jp/support/list/router/ar410v2/docs/pki.pdf
+
+
+### 証明書・秘密鍵作成スクリプト
+
+vagrant@trainPF:~/wk$ cat setupCert.sh 
+#!/bin/bash
+
+readonly CA_KEY=ca.key.pem
+readonly CA_CRT=ca.crt.pem
+readonly SRV_KEY=srv.key.pem
+readonly SRV_REQ=srv.req.pem
+readonly SRV_CRT=srv.crt.pem
+readonly SRV_COMMON_NAME=192.168.100.17
+readonly CLI_KEY=cli.key.pem
+readonly CLI_REQ=cli.req.pem
+readonly CLI_CRT=cli.crt.pem
+readonly CLI_COMMON_NAME=192.168.200.1
+
+readonly SRV_ORGANIZATION=TMK.COMMPF
+readonly OUTPUT=./output
+
+rm /etc/ipsec.d/cacerts/*
+rm /etc/ipsec.d/certs/*
+rm /etc/ipsec.d/private/*
+rm -rf ${OUTPUT}
+mkdir -p ${OUTPUT}
+
+# create root cert
+cakey=${OUTPUT}/${CA_KEY}
+cacrt=${OUTPUT}/${CA_CRT}
+ipsec pki --gen --type rsa --size 3072 --outform pem > ${cakey}
+ipsec pki --self --ca --lifetime 3652 --in ${cakey} --dn "C=JP, O=strongSwan, CN=strongSwanVPN CA" --outform pem > ${cacrt}
+ipsec pki --print --in ${cacrt}
+
+# copy /etc/ipsec.d/*
+cp ${cakey} /etc/ipsec.d/private/
+cp ${cacrt} /etc/ipsec.d/cacerts/
+chmod 600 /etc/ipsec.d/private/${CA_KEY}
+chmod 600 /etc/ipsec.d/cacerts/${CA_CRT}
+chown root:root /etc/ipsec.d/private/${CA_KEY}
+chown root:root /etc/ipsec.d/cacerts/${CA_CRT}
+
+
+# create server cert
+srvkey=${OUTPUT}/${SRV_KEY}
+srvreq=${OUTPUT}/${SRV_REQ}
+srvcrt=${OUTPUT}/${SRV_CRT}
+ipsec pki --gen --type rsa --size 3072 --outform pem > ${srvkey}
+ipsec pki --req --type priv --in ${srvkey} --dn "C=JP, O=${SRV_ORGANIZATION}, CN=${SRV_COMMON_NAME}" --san ${SRV_COMMON_NAME} --outform pem > ${srvreq}
+ipsec pki --issue --cacert ${cacrt} --cakey ${cakey} --type pkcs10 --in ${srvreq} --flag serverAuth --serial 01 --lifetime 1826 --outform pem > ${srvcrt}
+ipsec pki --print --in ${srvcrt}
+
+# copy /etc/ipsec.d/*
+cp ${srvkey} /etc/ipsec.d/private/
+cp ${srvcrt} /etc/ipsec.d/certs/
+chmod 600 /etc/ipsec.d/private/${SRV_KEY}
+chmod 600 /etc/ipsec.d/certs/${SRV_CRT}
+chown root:root /etc/ipsec.d/private/${SRV_KEY}
+chown root:root /etc/ipsec.d/certs/${SRV_CRT}
+
+
+# create client cert
+clikey=${OUTPUT}/${CLI_KEY}
+clireq=${OUTPUT}/${CLI_REQ}
+clicrt=${OUTPUT}/${CLI_CRT}
+ipsec pki --gen --type rsa --size 3072 --outform pem > ${clikey}
+ipsec pki --req --type priv --in ${clikey} --dn "C=JP, O=${SRV_ORGANIZATION}, CN=${CLI_COMMON_NAME}" --san ${CLI_COMMON_NAME} --outform pem > ${clireq}
+ipsec pki --issue --cacert ${cacrt} --cakey ${cakey} --type pkcs10 --in ${clireq} --flag serverAuth --serial 01 --lifetime 1826 --outform pem > ${clicrt}
+ipsec pki --print --in ${clicrt}
+
+# copy /etc/ipsec.d/*
+cp ${clikey} /etc/ipsec.d/private/
+cp ${clicrt} /etc/ipsec.d/certs/
+chmod 600 /etc/ipsec.d/private/${CLI_KEY}
+chmod 600 /etc/ipsec.d/certs/${CLI_CRT}
+chown root:root /etc/ipsec.d/private/${CLI_KEY}
+chown root:root /etc/ipsec.d/certs/${CLI_CRT}
+
+
+### サーバ側 = 地上側PF 
+vagrant@groundPF:/etc$ cat ipsec.conf 
+# ipsec.conf - strongSwan IPsec configuration file
+
+# basic configuration
+
+config setup
+        # strictcrlpolicy=yes
+        # uniqueids = no
+
+# Add connections here.
+
+# Sample VPN connections
+
+conn test1
+        auto=add
+        type=transport
+        #authby=psk
+        authby=rsasig
+        leftid=192.168.100.17
+        leftcert=srv.crt.pem
+        leftsendcert=always
+        rightcert=cli.crt.pem
+        rightsendcert=always
+        keyexchange=ikev2
+        ike=aes256-sha1-modp1024
+        esp=aes256-sha1-modp1024
+        left=192.168.100.17
+        right=192.168.200.1
+        keyingtries=%forever
+        ikelifetime=1h
+        lifetime=30m
+        dpdaction=clear
+        dpddelay=30s
+        dpdtimeout=120s
+
+#conn sample-self-signed
+#      leftsubnet=10.1.0.0/16
+#      leftcert=selfCert.der
+#      leftsendcert=never
+#      right=192.168.0.2
+#      rightsubnet=10.2.0.0/16
+#      rightcert=peerCert.der
+#      auto=start
+
+#conn sample-with-ca-cert
+#      leftsubnet=10.1.0.0/16
+#      leftcert=myCert.pem
+#      right=192.168.0.2
+#      rightsubnet=10.2.0.0/16
+#      rightid="C=CH, O=Linux strongSwan CN=peer name"
+#      auto=start
+
+vagrant@groundPF:/etc$ sudo cat ipsec.secrets
+# This file holds shared secrets or RSA private keys for authentication.
+
+# RSA private key for this host, authenticating it to any other host
+# which knows the public part.
+# : PSK "mykey"
+ : RSA "srv.key.pem"
+
+
+vagrant@groundPF:/etc$ sudo ls -lR /etc/ipsec.d/
+/etc/ipsec.d/:
+total 36
+drwxr-xr-x 2 root root 4096 Sep 20  2022 aacerts
+drwxr-xr-x 2 root root 4096 Sep 20  2022 acerts
+drwxr-xr-x 2 root root 4096 Mar 26 07:29 cacerts
+drwxr-xr-x 2 root root 4096 Mar 26 07:56 certs
+drwxr-xr-x 2 root root 4096 Sep 20  2022 crls
+drwxr-xr-x 2 root root 4096 Sep 20  2022 ocspcerts
+drwxr-xr-x 2 root root 4096 Sep 20  2022 policies
+drwx------ 2 root root 4096 Mar 26 08:06 private
+drwxr-xr-x 2 root root 4096 Sep 20  2022 reqs
+
+/etc/ipsec.d/aacerts:
+total 0
+
+/etc/ipsec.d/acerts:
+total 0
+
+/etc/ipsec.d/cacerts:
+total 4
+-rw------- 1 root root 1533 Mar 26 07:25 ca.crt.pem
+
+/etc/ipsec.d/certs:
+total 8
+-rw------- 1 root root 1529 Mar 26 07:25 cli.crt.pem
+-rw------- 1 root root 1529 Mar 26 07:56 srv.crt.pem
+
+/etc/ipsec.d/crls:
+total 0
+
+/etc/ipsec.d/ocspcerts:
+total 0
+
+/etc/ipsec.d/policies:
+total 0
+
+/etc/ipsec.d/private:
+total 12
+-rw------- 1 root root 2455 Mar 26 07:27 ca.key.pem
+-rw------- 1 root root 2459 Mar 26 07:27 cli.key.pem
+-rw------- 1 root root 2455 Mar 26 08:06 srv.key.pem
+
+/etc/ipsec.d/reqs:
+total 0
+vagrant@groundPF:/etc$ sudo ipsec statusall
+Status of IKE charon daemon (strongSwan 5.8.2, Linux 5.4.0-139-generic, x86_64):
+  uptime: 5 minutes, since Mar 26 08:07:01 2023
+  malloc: sbrk 1634304, mmap 0, used 673520, free 960784
+  worker threads: 11 of 16 idle, 5/0/0/0 working, job queue: 0/0/0/0, scheduled: 3
+  loaded plugins: charon aes rc2 sha2 sha1 md5 mgf1 random nonce x509 revocation constraints pubkey pkcs1 pkcs7 pkcs8 pkcs12 pgp dnskey sshkey pem openssl fips-prf gmp agent xcbc hmac gcm drbg attr kernel-netlink resolve socket-default connmark stroke updown eap-mschapv2 xauth-generic counters
+Listening IP addresses:
+  10.0.2.15
+  192.168.100.17
+  192.168.61.101
+  192.168.56.101
+Connections:
+       test1:  192.168.100.17...192.168.200.1  IKEv2, dpddelay=30s
+       test1:   local:  [192.168.100.17] uses public key authentication
+       test1:    cert:  "C=JP, O=TMK.COMMPF, CN=192.168.100.17"
+       test1:   remote: [192.168.200.1] uses public key authentication
+       test1:    cert:  "C=JP, O=TMK.COMMPF, CN=192.168.200.1"
+       test1:   child:  dynamic === dynamic TRANSPORT, dpdaction=clear
+Security Associations (1 up, 0 connecting):
+       test1[1]: ESTABLISHED 4 minutes ago, 192.168.100.17[192.168.100.17]...192.168.200.1[192.168.200.1]
+       test1[1]: IKEv2 SPIs: d2b3c0166b580bca_i aec482dfa54ee0bc_r*, public key reauthentication in 38 minutes
+       test1[1]: IKE proposal: AES_CBC_256/HMAC_SHA1_96/PRF_HMAC_SHA1/MODP_1024
+       test1{1}:  INSTALLED, TRANSPORT, reqid 1, ESP SPIs: c7d72047_i c64ba069_o
+       test1{1}:  AES_CBC_256/HMAC_SHA1_96, 192 bytes_i (3 pkts, 256s ago), 192 bytes_o (3 pkts, 256s ago), rekeying in 10 minutes
+       test1{1}:   192.168.100.17/32 === 192.168.200.1/32
+
+
+### クライアント側 = 車上側PF 
+vagrant@trainPF:~/wk$ cd /etc/
+vagrant@trainPF:/etc$ cat ipsec.conf 
+# ipsec.conf - strongSwan IPsec configuration file
+
+# basic configuration
+
+config setup
+        # strictcrlpolicy=yes
+        # uniqueids = no
+
+# Add connections here.
+
+# Sample VPN connections
+
+conn test1
+        auto=start
+        type=transport
+        #authby=psk
+        leftid=192.168.200.1
+        leftcert=cli.crt.pem
+        leftsendcert=always
+        rightcert=srv.crt.pem
+        rightsendcert=always
+        keyexchange=ikev2
+        ike=aes256-sha1-modp1024
+        esp=aes256-sha1-modp1024
+        left=192.168.200.1
+        right=192.168.100.17
+        keyingtries=%forever
+        ikelifetime=1h
+        lifetime=30m
+        dpdaction=restart
+        dpddelay=30s
+        dpdtimeout=120s
+
+#conn sample-self-signed
+#      leftsubnet=10.1.0.0/16
+#      leftcert=selfCert.der
+#      leftsendcert=never
+#      right=192.168.0.2
+#      rightsubnet=10.2.0.0/16
+#      rightcert=peerCert.der
+#      auto=start
+
+#conn sample-with-ca-cert
+#      leftsubnet=10.1.0.0/16
+#      leftcert=myCert.pem
+#      right=192.168.0.2
+#      rightsubnet=10.2.0.0/16
+#      rightid="C=CH, O=Linux strongSwan CN=peer name"
+#      auto=start
+vagrant@trainPF:/etc$ sudo cat ipsec.secrets 
+# This file holds shared secrets or RSA private keys for authentication.
+
+# RSA private key for this host, authenticating it to any other host
+# which knows the public part.
+
+# : PSK "mykey"
+ : RSA "cli.key.pem"
+
+vagrant@trainPF:/etc$ sudo ipsec statusall
+Status of IKE charon daemon (strongSwan 5.8.2, Linux 5.4.0-139-generic, x86_64):
+  uptime: 6 minutes, since Mar 26 08:07:17 2023
+  malloc: sbrk 1634304, mmap 0, used 681280, free 953024
+  worker threads: 11 of 16 idle, 5/0/0/0 working, job queue: 0/0/0/0, scheduled: 4
+  loaded plugins: charon aes rc2 sha2 sha1 md5 mgf1 random nonce x509 revocation constraints pubkey pkcs1 pkcs7 pkcs8 pkcs12 pgp dnskey sshkey pem openssl fips-prf gmp agent xcbc hmac gcm drbg attr kernel-netlink resolve socket-default connmark stroke updown eap-mschapv2 xauth-generic counters
+Listening IP addresses:
+  10.0.2.15
+  192.168.200.1
+  192.168.62.101
+  192.168.56.104
+Connections:
+       test1:  192.168.200.1...192.168.100.17  IKEv2, dpddelay=30s
+       test1:   local:  [192.168.200.1] uses public key authentication
+       test1:    cert:  "C=JP, O=TMK.COMMPF, CN=192.168.200.1"
+       test1:   remote: [192.168.100.17] uses public key authentication
+       test1:    cert:  "C=JP, O=TMK.COMMPF, CN=192.168.100.17"
+       test1:   child:  dynamic === dynamic TRANSPORT, dpdaction=restart
+Security Associations (1 up, 0 connecting):
+       test1[1]: ESTABLISHED 6 minutes ago, 192.168.200.1[192.168.200.1]...192.168.100.17[192.168.100.17]
+       test1[1]: IKEv2 SPIs: d2b3c0166b580bca_i* aec482dfa54ee0bc_r, public key reauthentication in 27 minutes
+       test1[1]: IKE proposal: AES_CBC_256/HMAC_SHA1_96/PRF_HMAC_SHA1/MODP_1024
+       test1{1}:  INSTALLED, TRANSPORT, reqid 1, ESP SPIs: c64ba069_i c7d72047_o
+       test1{1}:  AES_CBC_256/HMAC_SHA1_96, 192 bytes_i (3 pkts, 389s ago), 192 bytes_o (3 pkts, 389s ago), rekeying in 10 minutes
+       test1{1}:   192.168.200.1/32 === 192.168.100.17/32
+vagrant@trainPF:/etc$ 
+
+
