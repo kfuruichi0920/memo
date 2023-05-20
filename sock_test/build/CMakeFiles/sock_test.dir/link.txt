@@ -1,0 +1,1 @@
+/usr/bin/gcc -g3 -O0 -pg   CMakeFiles/sock_test.dir/sock_test.c.o CMakeFiles/sock_test.dir/sock_tcp.c.o CMakeFiles/sock_test.dir/sock_udp.c.o CMakeFiles/sock_test.dir/get_ifinfo.c.o  -o sock_test 

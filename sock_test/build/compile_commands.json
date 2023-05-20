@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/katsu/work/sock_test/build",
+  "command": "/usr/bin/gcc   -g3 -O0 -pg   -o CMakeFiles/sock_test.dir/sock_test.c.o   -c /home/katsu/work/sock_test/sock_test.c",
+  "file": "/home/katsu/work/sock_test/sock_test.c"
+},
+{
+  "directory": "/home/katsu/work/sock_test/build",
+  "command": "/usr/bin/gcc   -g3 -O0 -pg   -o CMakeFiles/sock_test.dir/sock_tcp.c.o   -c /home/katsu/work/sock_test/sock_tcp.c",
+  "file": "/home/katsu/work/sock_test/sock_tcp.c"
+},
+{
+  "directory": "/home/katsu/work/sock_test/build",
+  "command": "/usr/bin/gcc   -g3 -O0 -pg   -o CMakeFiles/sock_test.dir/sock_udp.c.o   -c /home/katsu/work/sock_test/sock_udp.c",
+  "file": "/home/katsu/work/sock_test/sock_udp.c"
+},
+{
+  "directory": "/home/katsu/work/sock_test/build",
+  "command": "/usr/bin/gcc   -g3 -O0 -pg   -o CMakeFiles/sock_test.dir/get_ifinfo.c.o   -c /home/katsu/work/sock_test/get_ifinfo.c",
+  "file": "/home/katsu/work/sock_test/get_ifinfo.c"
+}
+]
