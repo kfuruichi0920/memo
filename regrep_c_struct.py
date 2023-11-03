@@ -2,7 +2,7 @@
 ## C/C++テーブル定義抽出スクリプト
 ##
 ## Version
-## 1.0  2023.11.06
+## 1.0  2023.11.06　2D配列まで対応。3D以上、構造体には未対応。
 ## Author : K.Furuichi
 #############################################################################
 import re
@@ -48,6 +48,10 @@ def ExtractStructCont(input_string):
 def DivideElemenet(input_string):
 	# 先頭末尾の空白削除し、要素ごと分解
 	l = [i.strip() for i in input_string.split(',')]
+
+	# DEBUG用：numpy arrny への変換に失敗した場合の確認用
+	print("len=", len(l), " string[", input_string, "]" )
+	
 	return l
 
 ''''配列ブロック分解
@@ -68,7 +72,9 @@ def DivideElementBlock(input_string):
 	# 空白削除
 	tmp_string = re.sub(r'\s','', input_string)
 
-	#print("tmp_string[0]=",tmp_string[0])
+	#DEBGU用
+	#print("tmp_string: ",tmp_string)
+
 	if tmp_string[0] == '{' and tmp_string[1] == '{':
 		#最大範囲で{～}を取得
 		pattern = r'\{(.*)\}\s*,?'
@@ -85,8 +91,8 @@ def DivideElementBlock(input_string):
 			#print("BBBB:"+m.group(1))
 			g_lst_e.append(DivideElemenet(il.group(1)))
 			len = len + 1
-#		if len == 0:
-#			g_lst_e.append(DivideElemenet(tmp_string))
+		if len == 0:
+			g_lst_e.append(DivideElemenet(tmp_string))
 	return g_lst_e
 
 #-------------------------------------------------------------
@@ -104,12 +110,21 @@ tmp_string1 = GetInputString()
 if tmp_string1 == '':
 	exit
 
-# 行コメント削除
-tmp_string2 = re.sub(r'//.*$', '', tmp_string1)
+# 行コメント削除 否定先読み(https://www.javadrive.jp/python/regex/index16.html)
+tmp_string2 = re.sub(r'//(?!\*).*', '', tmp_string1)
 # 改行コード削除
 tmp_string3 = tmp_string2.replace("\n", "")
-# コメント削除(TODO入れ子のコメントには未対応)
-input_string = re.sub(r'/\*.*?\*/', '', tmp_string3)
+# 複数行コメント削除(TODO入れ子のコメントには未対応)
+tmp_string4= re.sub(r'#if 0.*?#endif', '', tmp_string3)
+# 複数行コメント削除(TODO入れ子のコメントには未対応)
+input_string = re.sub(r'/\*.*?\*/', '', tmp_string4)
+
+# DEBUG用
+#print("[1]", tmp_string1)
+#print("[2]", tmp_string2)
+#print("[3]", tmp_string3)
+#print("[4]", tmp_string4)
+#print("[5]", input_string)
 
 # 構造体抽出
 # ";"で分割する
@@ -125,10 +140,14 @@ for l in list_struct:
 	# 配列要素分解
 	DivideElementBlock(match_struct.group(3))
 
-	# numpy arrayに変換する
-	np_array = np.array(g_lst_e)
 	print("name = ", match_struct.group(1))
 	#print("n_index = "+match_struct.group(2))
+
+	# DEBUG用：numpy arrny への変換に失敗した場合の確認用
+	#print("list size = ", [len(value) for value in g_lst_e])
+	
+	# numpy arrayに変換する
+	np_array = np.array(g_lst_e)
 	print("ndim = ", np_array.shape)
 	print()
 	print(np_array)
