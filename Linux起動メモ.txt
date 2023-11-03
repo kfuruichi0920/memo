@@ -1,77 +1,112 @@
 1. barebox
 
-  /env/init   ‚Å‹N“®
+  /env/init   ã§èµ·å‹•
    -> /env/boot 
-     ‚±‚±‚Å bootargs=xxxx ‚Ì‚æ‚¤‚ÉALinux‚Écmdlineˆø”‚ğİ’è‚µ‚Ä‚¢‚éB
-     ÅŒã‚É
-     -> bootm $bootm_opt $kdev   š‚±‚±‚Écmdline’Ç‰Á‚·‚é‚Ì‚ªè‚Áæ‚è‘‚¢
+     ã“ã“ã§ bootargs=xxxx ã®ã‚ˆã†ã«ã€Linuxã«cmdlineå¼•æ•°ã‚’è¨­å®šã—ã¦ã„ã‚‹ã€‚
+     æœ€å¾Œã«
+     -> bootm $bootm_opt $kdev   â˜…ã“ã“ã«cmdlineè¿½åŠ ã™ã‚‹ã®ãŒæ‰‹ã£å–ã‚Šæ—©ã„
   
-   bootm‚ÌƒvƒƒOƒ‰ƒ€©‘Ì‚Í
+   bootmã®ãƒ—ãƒ­ã‚°ãƒ©ãƒ è‡ªä½“ã¯
     arch/arm/lib32/bootm.c
        __do_bootm_linux() -> start_linux()
        
     arch/arm/lib32/armlinux.c
-       start_linux() -> kernel(xxxxx)@‚ÅA‚±‚Ìkernel ‚ÍAŒÄ‚Ño‚µŒ³‚Ì "__do_bootm_linux"‚Ìæ“ª‚Å
+       start_linux() -> kernel(xxxxx)ã€€ã§ã€ã“ã®kernel ã¯ã€å‘¼ã³å‡ºã—å…ƒã® "__do_bootm_linux"ã®å…ˆé ­ã§
           kernel = data->os_res->start + data->os_entry;
-       ‚Æ’è‹`‚³‚ê‚Ä‚¢‚éB
-       ‚¨‚»‚ç‚­AlinuxƒJ[ƒlƒ‹ƒCƒ[ƒW‚Ìæ“ª‚ÖƒWƒƒƒ“ƒv‚·‚éB‡‚í‚¹‚Äcmdline ‚ğ“n‚·B
+       ã¨å®šç¾©ã•ã‚Œã¦ã„ã‚‹ã€‚
+       ãŠãã‚‰ãã€linuxã‚«ãƒ¼ãƒãƒ«ã‚¤ãƒ¡ãƒ¼ã‚¸ã®å…ˆé ­ã¸ã‚¸ãƒ£ãƒ³ãƒ—ã™ã‚‹ã€‚åˆã‚ã›ã¦cmdline ã‚’æ¸¡ã™ã€‚
 
 
 2. Linux
    
-   <<ƒƒ‚>>
+   <<ãƒ¡ãƒ¢>>
    https://fowlrat.hatenablog.com/entry/2014/08/31/011056
    
-   ƒJ[ƒlƒ‹ƒrƒ‹ƒh‚µ‚½Œ‹‰Ê‚ª vmlinux
-   vmlinux ‚©‚ç .commentƒZƒNƒVƒ‡ƒ“AƒVƒ“ƒ{ƒ‹Ä”z’uî•ñ‚ğíœ‚µ‚½‚à‚Ì‚ªAzImage
-   zImage ‚©‚çAuImage ‚ğì‚éB
+   ã‚«ãƒ¼ãƒãƒ«ãƒ“ãƒ«ãƒ‰ã—ãŸçµæœãŒ vmlinux
+   vmlinux ã‹ã‚‰ .commentã‚»ã‚¯ã‚·ãƒ§ãƒ³ã€ã‚·ãƒ³ãƒœãƒ«å†é…ç½®æƒ…å ±ã‚’å‰Šé™¤ã—ãŸã‚‚ã®ãŒã€zImage
+   zImage ã‹ã‚‰ã€uImage ã‚’ä½œã‚‹ã€‚
    
-   ‚±‚ÌuImage ‚ğA”z’u‚µ‚Ä‚¨‚«Abarebox ‚É‚ÄƒAƒhƒŒƒXw’è‚µ‚ÄŠJn‚·‚éB
+   ã“ã®uImage ã‚’ã€é…ç½®ã—ã¦ãŠãã€barebox ã«ã¦ã‚¢ãƒ‰ãƒ¬ã‚¹æŒ‡å®šã—ã¦é–‹å§‹ã™ã‚‹ã€‚
    
    vmlinux
    https://valinux.hatenablog.com/entry/20200910
-   ‚É‚æ‚é‚ÆAvmlinuz ‚Ìê‡‚Íˆ³k‚³‚ê‚Ä‚¢‚é‚Ì‚ÅAL’·ƒvƒƒOƒ‰ƒ€‚àŠÜ‚Ü‚êAÅ‰‚ÉL’·ƒvƒƒOƒ‰ƒ€‚ªƒR[ƒ‹‚³‚ê‚éB
+   ã«ã‚ˆã‚‹ã¨ã€vmlinuz ã®å ´åˆã¯åœ§ç¸®ã•ã‚Œã¦ã„ã‚‹ã®ã§ã€ä¼¸é•·ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã‚‚å«ã¾ã‚Œã€æœ€åˆã«ä¼¸é•·ãƒ—ãƒ­ã‚°ãƒ©ãƒ ãŒã‚³ãƒ¼ãƒ«ã•ã‚Œã‚‹ã€‚
    
    
-   Ÿ‚ÉAvmLinux‚ÍˆÈ‰ºB
-   ARM LinuxƒJ[ƒlƒ‹ƒGƒ“ƒgƒŠ[
+   æ¬¡ã«ã€vmLinuxã¯ä»¥ä¸‹ã€‚
+   ARM Linuxã‚«ãƒ¼ãƒãƒ«ã‚¨ãƒ³ãƒˆãƒªãƒ¼
    http://masahir0y.blogspot.com/2012/02/arm-linux.html
    
-   ‚±‚ê‚æ‚èA
+   ã“ã‚Œã‚ˆã‚Šã€
      arch/arm/kernel/head-common.S
-       ‚±‚±‚©‚ç start_kernel() ‚ªƒR[ƒ‹B
+       ã“ã“ã‹ã‚‰ start_kernel() ãŒã‚³ãƒ¼ãƒ«ã€‚
      
      init/main.c
      start_kernel()
      
-     ‚ªÀs‚³‚ê‚éB
+     ãŒå®Ÿè¡Œã•ã‚Œã‚‹ã€‚
    
    
    
-   ƒJ[ƒlƒ‹ˆ—‚ªI‚í‚Á‚½‚çAbarebox‚Ìcmdline‚Å“n‚³‚ê‚½  init=/etc/preinit ‚æ‚èArootfs ‚Ì /etc/preinit ‚ªÀs‚³‚ê‚éB
+   ã‚«ãƒ¼ãƒãƒ«å‡¦ç†ãŒçµ‚ã‚ã£ãŸã‚‰ã€bareboxã®cmdlineã§æ¸¡ã•ã‚ŒãŸ  init=/etc/preinit ã‚ˆã‚Šã€rootfs ã® /etc/preinit ãŒå®Ÿè¡Œã•ã‚Œã‚‹ã€‚
    
    /etc/preinit
-     /lib/preinit/* ‚ÌƒXƒNƒŠƒvƒg‚ªÀs
+     /lib/preinit/* ã®ã‚¹ã‚¯ãƒªãƒ—ãƒˆãŒå®Ÿè¡Œ
    
-   ‚»‚ÌŒã‚É
+   ãã®å¾Œã«
    
    https://openwrt.org/ja/docs/techref/process.boot
-   ‚ğ‚İ‚é‚Æ
+   ã‚’ã¿ã‚‹ã¨
    
    /etc/inittab
    /etc/init.d/rcS
    
    
-   ‚¨‚»‚ç‚­A‚»‚ÌŒã
+   ãŠãã‚‰ãã€ãã®å¾Œ
    
    /etc/init.d/boot
     start()
     
-   ‚ª‚æ‚Î‚ê‚éB    (‹N“®ƒƒO‚©‚ç„‘ª)
-   ‚±‚Ì’†‚ÅA©ìƒhƒ‰ƒCƒo‚È‚Ç‚ğ’è‹`‚µA‚±‚±‚Åload‚·‚éB ex) reg_drver qca8337 ‚È‚Ç
-   
-   
-   
+   ãŒã‚ˆã°ã‚Œã‚‹ã€‚    (èµ·å‹•ãƒ­ã‚°ã‹ã‚‰æ¨æ¸¬)
+   ã“ã®ä¸­ã§ã€è‡ªä½œãƒ‰ãƒ©ã‚¤ãƒãªã©ã‚’å®šç¾©ã—ã€ã“ã“ã§loadã™ã‚‹ã€‚ ex) reg_drver qca8337 ãªã©
+
+
+â– QTTab
+	ã‚°ãƒ«ãƒ¼ãƒ—åŒ–
+	ã‚°ãƒ«ãƒ¼ãƒ—ã§è‰²è¨­å®š
+
+â– Excel
+â˜…ãŠå½¹ç«‹ã¡ã‚’å°å…¥ã™ã‚‹
+
+â– VSCode
+â—¯Editor
+Ctrl+K Ctrl+Lï¼šæŠ˜ã‚Šç•³ã¿ï¼å±•é–‹ã®ãƒˆã‚°ãƒ«
+Ctrl+K Ctrl+[ï¼šå†å¸°çš„ã«æŠ˜ã‚ŠãŸãŸã¿
+Ctrl+K Ctrl+]ï¼šå†å¸°çš„ã«å±•é–‹
+Ctrl+K Ctrl+0ï¼šã™ã¹ã¦æŠ˜ã‚ŠãŸãŸã¿
+Ctrl+K Ctrl+Jï¼šã™ã¹ã¦å±•é–‹
+Ctrl+K Ctrl+/ï¼šã™ã¹ã¦ã®ãƒ–ãƒ­ãƒƒã‚¯ã‚³ãƒ¡ãƒ³ãƒˆã®æŠ˜ã‚ŠãŸãŸã¿
+
+Ctrl+K Ctrl+Cï¼šã‚³ãƒ¡ãƒ³ãƒˆ
+Ctrl+K Ctrl+Uï¼šã‚³ãƒ¡ãƒ³ãƒˆè§£é™¤
+
+Ctrl+Shit+K : è¡Œå‰Šé™¤
+
+â—¯ãƒ‡ãƒãƒƒã‚¬
+viewContainer.workbench.view.debug.enabled
+Ctrl + Shift + D : å¤‰æ•°
+Ctrl + Shift + W : ã‚¦ã‚©ãƒƒãƒå¼
+Ctrl + Shift + B : ãƒ–ãƒ¬ãƒ¼ã‚¯ãƒã‚¤ãƒ³ãƒˆ
+Ctrl + Shift + S : ã‚¹ã‚¿ãƒƒã‚¯
+
+â—¯ãƒ‡ãƒãƒƒã‚°ã‚³ãƒ³ã‚½ãƒ¼ãƒ«
+Ctrl + Shift + Y ã§ç§»å‹•
+Alt + Y ã§ãƒ•ã‚£ãƒ«ã‚¿æ©Ÿèƒ½
+
+â—¯
+Zlt + Z æŠ˜è¿”ã—è¡¨ç¤ºå¤‰æ›´
+
+
    
    
    
